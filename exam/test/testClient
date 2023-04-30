@@ -1,0 +1,74 @@
+import ee.taltech.iti0202.kt.store.Client;
+import ee.taltech.iti0202.kt.store.ClientType;
+import ee.taltech.iti0202.kt.store.ExceptionCannotBuyProduct;
+import ee.taltech.iti0202.kt.store.Product;
+import ee.taltech.iti0202.kt.store.ProductType;
+import ee.taltech.iti0202.kt.store.ShoppingList;
+import org.testng.annotations.Test;
+
+import java.util.Optional;
+
+import static org.testng.Assert.assertThrows;
+import static org.testng.AssertJUnit.assertEquals;
+
+public class TestClient {
+
+    @Test
+    public void testClientAddProducts() throws ExceptionCannotBuyProduct {
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        client.addProductToShoppingList(milk, 3);
+
+        Product butter = new Product("butter", ProductType.HAS_BARCODE, 50);
+        client.addProductToShoppingList(butter, 4);
+
+        assertEquals(2, client.getShoppingList().getShoppingList().size());
+        assertEquals(1000, client.getWallet());
+    }
+
+    @Test
+    public void testCannotAddProductsNotEnoughMoney() {
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(10);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+
+        assertThrows(ExceptionCannotBuyProduct.class, () -> {
+            client.addProductToShoppingList(milk, 3);
+        });
+    }
+
+    @Test
+    public void testAddProductsThatExist() throws ExceptionCannotBuyProduct {
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        client.addProductToShoppingList(milk, 3);
+
+        client.addProductToShoppingList(milk, 6);
+
+        assertEquals(Optional.of(9), Optional.of(client.getShoppingList().getShoppingList().get(milk)));
+
+        // siin amount mida lisatakse näitab kogust kokku, mitte seda mis juurde pannakse
+        client.getShoppingList().addNewProductToShoppingList(milk, 15);
+        assertEquals(Optional.of(15), Optional.of(client.getShoppingList().getShoppingList().get(milk)));
+    }
+
+    @Test
+    public void testRemoveProductsFromShoppingList() throws ExceptionCannotBuyProduct {
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        client.addProductToShoppingList(milk, 3);
+        client.removeProductFromShoppingList(milk);
+        assertEquals(0, client.getShoppingList().getShoppingList().size());
+    }
+}
