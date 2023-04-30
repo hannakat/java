@@ -1,0 +1,44 @@
+package ee.taltech.iti0202.coffee.machine;
+
+public class WaterTank {
+
+    private int capacity;
+    private int waterTank;
+
+    public WaterTank() {
+        this.waterTank = 100;
+        this.capacity = 100;
+    }
+
+    /**
+     *
+     * @param newSize the new size of the water tank
+     */
+    public void changeWaterTankSize(int newSize) {
+        this.waterTank = newSize;
+        this.capacity = newSize;
+    }
+
+    /**
+     *
+     * @return how much water is left in the water tank
+     */
+    public int getWaterTank() {
+        return waterTank;
+    }
+
+    /**
+     *
+     * @param waterTank use some water from water tank for coffee
+     */
+    public void setWaterTank(int waterTank) {
+        this.waterTank = waterTank;
+    }
+
+    /**
+     * refills the water tank to maximum capability
+     */
+    public void refillWater() {
+        this.waterTank = capacity;
+    }
+}
