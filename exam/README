@@ -1,0 +1,38 @@
+ÜLESANNE
+Klient
+Tal on id, korv, tüüp (kuldklient, tava klient) ja ostude ajalugu
+
+Klient saab vaadata ostude ajalugu (näiteks näeb, et ostis 10.04 saia ja piima, 4.04 leiba, piima ja nutellat)
+Klient näeb ajalugu selliselt, et kõige hiljutisem ost on esimene. (10.04 ..., 4.04...., 27.03....)
+Klient ei saa sooritada ostu, kui ta arvel on ostukorvi maksumusest madalam summa - visata veateade.
+Kuldkilent saab 10% soodustust toodetelt
+(Kood peaks olema nii kirjutatud, et hiljem võib koodis erinevaid tüüpi kliente olla, kellel on veel mingid erinevad omadused.)
+
+E-Poes müüdav ese
+Sellel on nimi, hind, tüüp (triipkoodiga või ilma), ja kogus (kui palju toodet on e-poes olemas)
+
+Igat eset on e-poes kindel kogus.
+Klient saab osta e-poes eset seni, kuniks kaupa jätkub.
+Triipkoodiga esemetele võivad kehtida kampaaniad (nt. "two for one", "three for one")
+E-poes peab olema vähemalt 2 kampaaniat
+Kui on kampaania "two for one" ja ostetakse paaritu arv esemeid siis 1 esemele kampaania ei kehtiks (näiteks ostad 17 toodet, 16 tootele kehtib kampaania pakkumine ja 1 toode ostetakse tava hinnaga).
+Ostukorv
+Saab lisada ja eemaldada esemeid
+Saab suurendada või vähendada esemete hulka
+Saab lisada triipkoodiga esemeid (näiteks joogid/snäkid jne)
+Saab lisada triipkoodita esemeid (näiteks puuviljad)
+E-pood
+Teab toodete koguste kohta
+Teab kõikide toimunud ostude kohta
+Teab kõiki e-poodi registreeritud kliente.
+Kui e-poes saavad tooted otsa läheb e-pood kinni. Muidu on e-pood kogu aeg lahti,
+
+Testid
+
+Kirjuta testid, siin on näited olukordadest, mida peaksid vaatama (olukordi võib veel olla):
+
+kliendi ostukorvis toodete lisamine ja eemaldamine
+kliendil on ülevaade korvis olevatest esemetest
+soodustuste aktiveerimine, kui ostukorvis teatud arv kindlat toodet ("two for one" jne.)
+edukas ost
+ost, kui kliendil liiga vähe raha- veateade
