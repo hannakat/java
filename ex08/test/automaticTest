@@ -1,0 +1,93 @@
+package ee.taltech.iti0202.coffee;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+import ee.taltech.iti0202.coffee.machine.Automatic;
+import ee.taltech.iti0202.coffee.machine.AutomaticMachineBuilder;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachine;
+import ee.taltech.iti0202.coffee.machine.WaterTank;
+import org.testng.annotations.Test;
+
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.GARBAGE_CAN_FULL;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_WATER_LEFT;
+import static org.testng.Assert.assertThrows;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
+
+public class AutomaticTest {
+    public static final int GARBAGE_CAN_SIZE = 15;
+    public static final int WATER_TANK_AMOUNT = 99;
+
+    @Test
+    public void testCreateAutomaticMachineCheckIngredients() {
+        WaterTank water = new WaterTank();
+        Automatic automatic = new AutomaticMachineBuilder().withWater(water).build();
+
+        assertEquals(5, automatic.getGarbageCan());
+        assertEquals(100, water.getWaterTank());
+
+        assertTrue(automatic.canMakeCoffee());
+    }
+
+    @Test
+    public void testAutomaticCannotMakeCoffeeNoWater() {
+        WaterTank water = new WaterTank();
+        Automatic automatic = new AutomaticMachineBuilder().withWater(water).build();
+
+        water.changeWaterTankSize(0);
+
+        assertFalse(automatic.canMakeCoffee());
+    }
+
+    @Test
+    public void testAutomaticMakesCoffeeUsesIngredients() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        Automatic automatic = new AutomaticMachineBuilder().withWater(water).build();
+
+        assertTrue(automatic.canMakeCoffee());
+
+        assertEquals(100, water.getWaterTank());
+        assertEquals(5, automatic.getGarbageCan());
+        assertEquals(CoffeeMachine.Coffee.LATTE, automatic.makeCoffee(CoffeeMachine.Coffee.LATTE));
+
+        assertEquals(WATER_TANK_AMOUNT, water.getWaterTank());
+        assertEquals(4, automatic.getGarbageCan());
+    }
+
+    @Test
+    public void testAutomaticMakesCoffeeRunsOutOfWater() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        Automatic automatic = new AutomaticMachineBuilder().withWater(water).build();
+
+        water.changeWaterTankSize(10);
+        automatic.setGarbageCan(GARBAGE_CAN_SIZE);
+
+        for (int i = 0; i < 10; i++) {
+            automatic.makeCoffee(CoffeeMachine.Coffee.CAPPUCCINO);
+        }
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            automatic.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        });
+        assertEquals(NO_WATER_LEFT, automatic.findTheProblemOfTheMachine());
+    }
+
+    @Test
+    public void testAutomaticMakesCoffeeGarbageCanFull() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        Automatic automatic = new AutomaticMachineBuilder().withWater(water).build();
+
+        water.changeWaterTankSize(GARBAGE_CAN_SIZE);
+        automatic.setGarbageCan(10);
+
+        for (int i = 0; i < 10; i++) {
+            automatic.makeCoffee(CoffeeMachine.Coffee.CAPPUCCINO);
+        }
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            automatic.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        });
+        assertEquals(GARBAGE_CAN_FULL, automatic.findTheProblemOfTheMachine());
+        assertFalse(automatic.canMakeCoffee());
+    }
+}
