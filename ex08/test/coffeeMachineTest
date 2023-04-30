@@ -1,0 +1,235 @@
+package ee.taltech.iti0202.coffee;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachine;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachineBuilder;
+import ee.taltech.iti0202.coffee.machine.WaterTank;
+import org.testng.annotations.Test;
+
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.GARBAGE_CAN_FULL;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.MACHINE_EMPTY;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_COFFEE_BEANS;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_MILK;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_WATER_LEFT;
+import static org.testng.Assert.assertThrows;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
+
+public class CoffeeMachineTest {
+
+    @Test
+    public void testCoffeeMachineMakesCoffee() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+        assertEquals(CoffeeMachine.Coffee.COFFEE, machine.makeCoffee(CoffeeMachine.Coffee.COFFEE));
+    }
+
+    /**
+     * coffee machine cannot make other types of coffees
+     */
+    @Test
+    public void testCoffeeMachineCannotMakeOtherCoffeeTypes() {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        });
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.CAPPUCCINO);
+        });
+    }
+
+    @Test
+    public void testCoffeeMachineRunsOutOfIngredientsAndRefill() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        water.setWaterTank(5);
+
+        for (int i = 0; i < 5; i++) {
+            machine.makeCoffee(CoffeeMachine.Coffee.COFFEE);
+        }
+
+        // run out of all ingredients
+        assertEquals(MACHINE_EMPTY, machine.findTheProblemOfTheMachine());
+
+        assertFalse(machine.canMakeCoffee());
+        assertEquals(0, water.getWaterTank());
+
+        assertEquals(0, machine.getGarbageCan());
+        machine.setGarbageCan(5);
+        assertEquals(5, machine.getGarbageCan());
+
+        assertEquals(0, machine.getMilk());
+        machine.buyMilk(5);
+        assertEquals(5, machine.getMilk());
+
+        assertEquals(0, machine.getCoffeeBeans());
+        machine.buyCoffeeBeans(5);
+        assertEquals(5, machine.getCoffeeBeans());
+    }
+
+    @Test
+    public void testCoffeeMachineCannotMakeCoffeeOutOfWater() throws CannotMakeCoffeeException {
+
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        water.changeWaterTankSize(0);
+
+        assertFalse(machine.canMakeCoffee());
+        assertEquals(NO_WATER_LEFT, machine.findTheProblemOfTheMachine());
+    }
+
+    @Test
+    public void testCoffeeMachineMakesCocoa() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        assertEquals(CoffeeMachine.Coffee.COCOA, machine.makeCoffee(CoffeeMachine.Coffee.COCOA));
+    }
+
+    @Test
+    public void testCoffeeMachineMakeHotWater() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        assertEquals(CoffeeMachine.Coffee.HOT_WATER, machine.makeCoffee(CoffeeMachine.Coffee.HOT_WATER));
+
+        water.changeWaterTankSize(0);
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.HOT_WATER);
+        });
+    }
+
+    @Test
+    public void testCoffeeMachineDoesNotHaveIngredientsForCocoa() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+        water.setWaterTank(0);
+
+        water.changeWaterTankSize(10);
+        machine.setGarbageCan(0);
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.COCOA);
+        });
+        assertEquals(GARBAGE_CAN_FULL, machine.findTheProblemOfTheMachine());
+    }
+
+    @Test
+    public void testCoffeeMachineThrowsExceptionWhenOutOfMilk() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        assertEquals(5, machine.getMilk());
+
+        for (int i = 0; i < 5; i++) {
+            machine.useIngredients();
+        }
+
+        assertEquals(0, machine.getMilk());
+
+        machine.buyCoffeeBeans(5);
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.COFFEE);
+        });
+        machine.setGarbageCan(5);
+        assertEquals(NO_MILK, machine.findTheProblemOfTheMachine());
+        assertFalse(machine.canMakeCoffee());
+    }
+
+    @Test
+    public void testCoffeeMachineCannotMakeCocoaOutOfMilk() {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        for (int i = 0; i < 5; i++) {
+            machine.useIngredients();
+        }
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.COCOA);
+        });
+    }
+
+    @Test
+    public void testCoffeeMachineThrowsExceptionWhenOutOfCoffeeBeans() {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        assertEquals(5, machine.getCoffeeBeans());
+
+        for (int i = 0; i < 5; i++) {
+            machine.useIngredients();
+        }
+
+        assertEquals(0, machine.getCoffeeBeans());
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.COFFEE);
+        });
+        machine.setGarbageCan(5);
+        machine.buyMilk(5);
+        assertEquals(NO_COFFEE_BEANS, machine.findTheProblemOfTheMachine());
+    }
+
+    @Test
+    public void testCoffeeMachineRunsOutOfMilkException() {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        assertEquals(5, machine.getMilk());
+
+        for (int i = 0; i < 5; i++) {
+            machine.useIngredients();
+        }
+
+        assertFalse(machine.canMakeCoffee());
+
+        machine.buyCoffeeBeans(5);
+        machine.setGarbageCan(5);
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.COFFEE);
+        });
+        assertEquals(NO_MILK, machine.findTheProblemOfTheMachine());
+    }
+
+    @Test
+    public void testMakeCoffeeRunsOutOfEverythingAndRefill() throws CannotMakeCoffeeException {
+        WaterTank water = new WaterTank();
+        CoffeeMachine machine = new CoffeeMachineBuilder().withWater(water).build();
+
+        water.changeWaterTankSize(5);
+
+        for (int i = 0; i < 5; i++) {
+            machine.makeCoffee(CoffeeMachine.Coffee.COFFEE);
+        }
+
+        // koik on otsas
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            machine.makeCoffee(CoffeeMachine.Coffee.COFFEE);
+        });
+
+        assertEquals(MACHINE_EMPTY, machine.findTheProblemOfTheMachine());
+
+        assertEquals(0, water.getWaterTank());
+        assertEquals(0, machine.getGarbageCan());
+        assertEquals(0, machine.getCoffeeBeans());
+        assertEquals(0, machine.getMilk());
+
+        machine.buyCoffeeBeans(10);
+        machine.buyMilk(10);
+        machine.setGarbageCan(10);
+        water.refillWater();
+
+        assertEquals(10, machine.getCoffeeBeans());
+        assertEquals(10, machine.getGarbageCan());
+        assertEquals(10, machine.getMilk());
+        assertEquals(5, water.getWaterTank());
+    }
+}
