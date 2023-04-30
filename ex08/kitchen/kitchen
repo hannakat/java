@@ -1,0 +1,94 @@
+package ee.taltech.iti0202.coffee.kitchen;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+import ee.taltech.iti0202.coffee.machine.Capsule;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachine;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+public class Kitchen {
+
+    List<CoffeeMachine> coffeeMachines = new ArrayList<>();
+    private static Logger logger = Logger.getLogger(Kitchen.class.getName());
+
+    /**
+     *
+     * @param machine adds coffee machine to kitchen machines list
+     */
+    public void addCoffeeMachine(CoffeeMachine machine) {
+        if (!coffeeMachines.contains(machine)) {
+            coffeeMachines.add(machine);
+            logger.info("coffee machine was added to kitchen");
+        }
+    }
+
+    /**
+     *
+     * @param machine removes machine from kitchen machines list
+     */
+    public void removeCoffeeMachine(CoffeeMachine machine) {
+        coffeeMachines.remove(machine);
+        logger.info("coffee machine was removed from the kitchen");
+    }
+
+    /**
+     *
+     * @return list of kitchen's coffee machines
+     */
+    public List<CoffeeMachine> getCoffeeMachines() {
+        return coffeeMachines;
+    }
+
+    /**
+     *
+     * @param coffee wished coffee type that every machine is going to make
+     * @return string of coffee type with how many cups of it was made
+     * when Coffee Machine cannot do that type of coffee it makes hot water
+     * if machine made hot water it does not count
+     * @throws CannotMakeCoffeeException if at least one machine could not make the wished coffee or hot water
+     */
+    public String kitchenAllMachinesMakeOneCoffee(CoffeeMachine.Coffee coffee) throws CannotMakeCoffeeException {
+        int count = 0;
+        for (CoffeeMachine machine : coffeeMachines) {
+            if (machine.getClass() == CoffeeMachine.class
+                    && !(coffee.equals(CoffeeMachine.Coffee.COFFEE) || coffee.equals(CoffeeMachine.Coffee.COCOA))) {
+                    machine.makeCoffee(CoffeeMachine.Coffee.HOT_WATER);
+            } else if (machine.getClass() == Capsule.class) {
+                ((Capsule) machine).addCapsule(coffee);
+                if (machine.makeCoffee(coffee) == coffee) {
+                    count++;
+                }
+                ((Capsule) machine).emptyCapsule();
+            } else {
+                machine.makeCoffee(coffee);
+                count++;
+            }
+        }
+        String result = coffee.toString().toLowerCase() + " x " + count;
+        logger.info("kitchen coffee machines made: " + result);
+        return result;
+    }
+
+    /**
+     *
+     * @param machine machine that's supposed to make coffee
+     * @param coffeeType coffee order
+     * @return coffee type if it was made
+     * @throws CannotMakeCoffeeException when an error occurred during coffee making
+     */
+    public CoffeeMachine.Coffee kitchenMakeSpecificCoffee(
+            CoffeeMachine machine, CoffeeMachine.Coffee coffeeType) throws CannotMakeCoffeeException {
+        if (coffeeMachines.contains(machine)) {
+            if (machine.makeCoffee(coffeeType) == coffeeType) {
+                logger.info("kitchen coffee machine made " + coffeeType.toString().toLowerCase());
+                return coffeeType;
+            } else {
+                throw new CannotMakeCoffeeException(machine, CannotMakeCoffeeException.Reason.KITCHEN_FAILED);
+            }
+        }
+        logger.info("coffee machine is not in kitchen machines list");
+        throw new CannotMakeCoffeeException(machine, CannotMakeCoffeeException.Reason.NO_SUCH_MACHINE);
+    }
+}
