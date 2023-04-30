@@ -1,0 +1,103 @@
+package ee.taltech.iti0202.coffee;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+import ee.taltech.iti0202.coffee.machine.Capsule;
+import ee.taltech.iti0202.coffee.machine.CapsuleMachineBuilder;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachine;
+import ee.taltech.iti0202.coffee.machine.WaterTank;
+import org.testng.annotations.Test;
+
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.GARBAGE_CAN_FULL;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_WATER_LEFT;
+import static org.testng.Assert.assertThrows;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
+
+public class CapsuleTest {
+
+    public static final int GARBAGE_CAN_SIZE = 15;
+
+    @Test
+    public void testCreateCapsuleCheckGarbageCanSize() {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        assertEquals(10, capsule.getGarbageCan());
+        assertTrue(capsule.canMakeCoffee());
+    }
+
+    @Test
+    public void testCapsuleMakeCoffeeCapsuleHasCoffee() throws CannotMakeCoffeeException {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        capsule.addCapsule(CoffeeMachine.Coffee.COFFEE);
+        assertEquals(CoffeeMachine.Coffee.COFFEE, capsule.makeCoffee(CoffeeMachine.Coffee.COFFEE));
+        capsule.addCapsule(CoffeeMachine.Coffee.CAPPUCCINO);
+        assertEquals(CoffeeMachine.Coffee.CAPPUCCINO, capsule.makeCoffee(CoffeeMachine.Coffee.CAPPUCCINO));
+    }
+
+    @Test
+    public void testCapsuleMakeCoffeeCapsuleEmpty() throws CannotMakeCoffeeException {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        assertEquals(CoffeeMachine.Coffee.HOT_WATER, capsule.makeCoffee(CoffeeMachine.Coffee.COFFEE));
+    }
+
+    @Test
+    public void testCapsuleRemoveCapsuleMakesOnlyHotWater() throws CannotMakeCoffeeException {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        capsule.addCapsule(CoffeeMachine.Coffee.COFFEE);
+        capsule.emptyCapsule();
+        assertEquals(CoffeeMachine.Coffee.HOT_WATER, capsule.makeCoffee(CoffeeMachine.Coffee.LATTE));
+    }
+
+    @Test
+    public void testCapsuleCanMakeOneCoffeeFromOneCapsule() throws CannotMakeCoffeeException {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        capsule.addCapsule(CoffeeMachine.Coffee.COFFEE);
+        assertEquals(CoffeeMachine.Coffee.COFFEE, capsule.makeCoffee(CoffeeMachine.Coffee.COFFEE));
+        assertEquals(CoffeeMachine.Coffee.HOT_WATER, capsule.makeCoffee(CoffeeMachine.Coffee.LATTE));
+    }
+
+    @Test
+    public void testCapsuleCannotMakeCoffeeGarbageCanFull() throws CannotMakeCoffeeException {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        for (int i = 0; i < 10; i++) {
+            capsule.addCapsule(CoffeeMachine.Coffee.LATTE);
+            capsule.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        }
+
+        capsule.addCapsule(CoffeeMachine.Coffee.LATTE);
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            capsule.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        });
+        assertEquals(GARBAGE_CAN_FULL, capsule.findTheProblemOfTheMachine());
+    }
+
+    @Test
+    public void testCapsuleCannotMakeCoffeeNoWater() throws CannotMakeCoffeeException {
+        WaterTank waterTank = new WaterTank();
+        Capsule capsule = new CapsuleMachineBuilder().withWater(waterTank).build();
+
+        waterTank.changeWaterTankSize(10);
+        capsule.setGarbageCan(GARBAGE_CAN_SIZE);
+        for (int i = 0; i < 10; i++) {
+            capsule.addCapsule(CoffeeMachine.Coffee.LATTE);
+            capsule.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        }
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            capsule.addCapsule(CoffeeMachine.Coffee.LATTE);
+            capsule.makeCoffee(CoffeeMachine.Coffee.LATTE);
+        });
+        assertEquals(NO_WATER_LEFT, capsule.findTheProblemOfTheMachine());
+    }
+}
