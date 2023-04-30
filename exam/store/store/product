@@ -1,0 +1,32 @@
+package ee.taltech.iti0202.kt.store;
+
+public class Product {
+    private final String name;
+    private final ProductType productType;
+    private final Integer price;
+
+    /**
+     *
+     * @param name product's name
+     * @param productType the type, if product has barcode or not
+     * @param price the price of the product
+     */
+    public Product(String name, ProductType productType, Integer price) {
+        this.name = name;
+        this.productType = productType;
+        this.price = price;
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public ProductType getProductType() {
+        return productType;
+    }
+}
