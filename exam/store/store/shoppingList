@@ -1,0 +1,60 @@
+package ee.taltech.iti0202.kt.store;
+
+import java.util.HashMap;
+
+public class ShoppingList {
+
+    private HashMap<Product, Integer> shoppingList = new HashMap<>();
+
+    public HashMap<Product, Integer> getShoppingList() {
+        return shoppingList;
+    }
+
+    /**
+     *
+     * @param product that is added to shopping list
+     * @param amount how much of that product is wished to buy
+     */
+    public void addNewProductToShoppingList(Product product, Integer amount) {
+        if (shoppingList.containsKey(product) && amount != 0) {
+            shoppingList.replace(product, amount);
+        } else if (amount != 0) {
+            shoppingList.put(product, amount);
+        }
+    }
+
+    /**
+     *
+     * @param product that is being removed from shopping list
+     */
+    public void removeProductFromShoppingList(Product product) {
+        shoppingList.remove(product);
+    }
+
+    /**
+     *
+     * @param product that exist in shopping list
+     * @param i the amount that replaces products amount in list
+     */
+    public void replace(Product product, int i) {
+        shoppingList.replace(product, i);
+    }
+
+    /**
+     *
+     * @param product product that's amount you want to know
+     * @return the amount of product
+     */
+    public Integer getAmount(Product product) {
+        return shoppingList.get(product);
+    }
+
+    /**
+     *
+     * @param product to check if shopping list has that product already
+     * @return true, if shopping list contains that product
+     */
+    public boolean containsProduct(Product product) {
+        return shoppingList.containsKey(product);
+    }
+}
