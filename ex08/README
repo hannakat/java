@@ -1,0 +1,60 @@
+ÜLESANNE
+Kohvimasin
+Kuna kõik kohvimasinad toodavad natuke prügi, siis on kõigil kohvimasinatel olemas
+prügikonteiner, mis mahutab n joogi valmistamise jagu prügi. Kui ei ole
+teisiti öeldud, mahutab see viie joogi jagu prügi. Kui prügikonteiner
+täis saab, tuleb see enne uue joogi valmistamist tühjendada.
+
+Samuti on kõikidel kohvimasinatel kindlasti "start" nupp, mille
+vajutamisel imeb masin veepaagist vee ja hakkab jooki valmistama.
+
+Antud ülesandes peab struktuur toetama erinevat tüüpi kohvimasinate loomist.
+
+Kohvimasinate loomiseks kasutage Builder disainimustrit.
+
+Automaatne kohvimasin
+Üks tüüp kohvimasinaid on "automaatne" kohvimasin. Automaatne kohvimasin
+on koguaeg "täidetud", ehk tema puhul ei pea arvestama, et kohvioad või
+piim (v.a. vesi) otsa võiks saada (kui teil on ka baas kohvimasinad, kus
+võib otsa saada). See masin oskab teha erinevaid jooke.
+
+(Kohvi)joogid
+Automaatne kohvimasin oskab teha nii kohvi, kakaod, cappuccinot kui ka vähemalt ühte teie valitud jooki. Kui hiljem
+mõeldakse välja veel mõni jook, siis selle peaks saama lisama tuntud jookide hulka.
+
+Kapselmasin
+Lisaks on olemas ka kapselkohvimasinad. Nendel masinatel on olemas pesa,
+kuhu saab panna kapsli (korraga saab olla ainult üks kapsel). Kapslis
+võib olla sees mingi joogi pulber, mis määrab ka ära, mis jook masinast
+välja tuleb. Ühest kapslist saab teha ühe joogi. Kui kapslist on jook tehtud,
+kaob ka pulber tema seest. Kui kapslis on sees tühjus, tuleb masinast välja
+vesi. Kapsli vahetamiseks tuleb masinast välja võtta vana kapsel ning
+asemele panna uus. Kapsli pesa saab olla ka tühi, sellisel juhul tuleb
+masinast välja jällegi vesi.
+
+Kuna kapselkohvimasin toodab lisaks kapslile väga vähe prügi, mahub nendel
+masinatel prügikonteinerisse kümne joogi jagu prügi. Kui antakse käsklus
+valmistada mingit kindlat jooki, peab see masin ise panema oma kapslipesasse
+sobiva kapsli.
+
+Veepaak
+Et kohvimasin jooki saaks valmistada, läheb sellel vaja vett. Igal masinal on
+üks veepaak, kust see vett võtab. Üks veepaak võib jagada vett ka mitmele
+masinale. Veepaagil on kindel mahutavus. Kui veepaak saab tühjaks, ei
+saa sealt enam vett välja võtta ning see peaks masinale tõrke põhjustama.
+Veepaaki saab täita (ainult ääreni täis). Alguses on veepaak ääreni täis.
+
+Köök
+Kõik kohvimasinad peaksid kuuluma mingile köögile. Köögile peab saama
+sisse anda ka tellimuse, mis jooki soovitakse ja mis masin (ise
+otsustate, kas valida saab masina tüüpi või konkreetset masinat) selle
+valmistab.
+
+Logimine
+Kõik tegevused peab ka logima. Realiseerida on küll vaja ainult
+standardväljundisse logimine, kuid teistsuguse logija kasutusele võtmine
+peaks olema võimalikult lihtne (näiteks boonusosas on vaja realiseerida
+ka faili logimine). Kogu tegevuse logimiseks peaks olema üks logija
+instants.
+
+Kasutada võiks Java klassi java.util.logging.Logger.
