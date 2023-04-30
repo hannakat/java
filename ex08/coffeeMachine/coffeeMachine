@@ -1,0 +1,200 @@
+package ee.taltech.iti0202.coffee.machine;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+
+import java.util.logging.Logger;
+
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.GARBAGE_CAN_FULL;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.MACHINE_EMPTY;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_COFFEE_BEANS;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_MILK;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_WATER_LEFT;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.WRONG_TYPE_COFFEE;
+import static ee.taltech.iti0202.coffee.machine.CoffeeMachine.Coffee.COCOA;
+import static ee.taltech.iti0202.coffee.machine.CoffeeMachine.Coffee.COFFEE;
+import static ee.taltech.iti0202.coffee.machine.CoffeeMachine.Coffee.HOT_WATER;
+
+public class CoffeeMachine {
+
+    private int cocoa;
+    private int coffeeBeans;
+    private int milk;
+    private WaterTank waterTank;
+    private int garbageCan;
+    private static Logger logger = Logger.getLogger(CoffeeMachine.class.getName());
+
+    /**
+     * @param waterTank every machine has water-tank
+     * other aspects are previously set, but can be changed
+     * every ingredient is made for one cup
+     * garbageCan can fit five cups of trash,
+     * when garbageCan = 0 means that there's no more free space
+     * */
+    public CoffeeMachine(WaterTank waterTank) {
+        this.garbageCan = 5;
+        this.coffeeBeans = 5;
+        this.milk = 5;
+        this.waterTank = waterTank;
+        this.cocoa = 100;
+    }
+
+    /**
+     *
+     * different types of coffees that different machines can make
+     * coffee machine can make only COFFEE, COCOA
+     */
+    public enum Coffee {
+        CAPPUCCINO, LATTE, COFFEE, COCOA, HOT_WATER;
+    }
+
+    /**
+     *
+     * @param amount size to change garbage can size
+     */
+    public void setGarbageCan(int amount) {
+        this.garbageCan = amount;
+        logger.info("changed garbage can size");
+    }
+
+    public int getGarbageCan() {
+        return garbageCan;
+    }
+
+    /**
+     *
+     * @param liters the amount of milk that was bought
+     */
+    public void buyMilk(int liters) {
+        milk += liters;
+        logger.info("added milk");
+    }
+
+    public int getMilk() {
+        return milk;
+    }
+
+    /**
+     *
+     * @param amount the amount of coffee beans that was bought
+     */
+    public void buyCoffeeBeans(int amount) {
+        coffeeBeans += amount;
+        logger.info("added coffee beans");
+    }
+
+    public int getCoffeeBeans() {
+        return coffeeBeans;
+    }
+
+    /**
+     *
+     * @return true, if machine has enough ingredients to make coffee
+     */
+    public boolean canMakeCoffee() {
+        if (waterTank.getWaterTank() == 0) {
+            return false;
+        } else if (garbageCan - 1 < 0) {
+            return false;
+        } else if (milk - 1 < 0) {
+            return false;
+        }
+        return coffeeBeans - 1 >= 0;
+    }
+
+    /**
+     *
+     * @return true, if machine has enough ingredients to make cocoa
+     */
+    private boolean canMakeCocoa() {
+        if (garbageCan - 1 < 0) {
+            return false;
+        } else if (waterTank.getWaterTank() == 0) {
+            return false;
+        } else if (milk - 1 < 0) {
+            return false;
+        }
+        return cocoa - 1 >= 0;
+    }
+
+    /**
+     * uses ingredients to make coffee
+     * does not need checking, because that is done previously
+     */
+    public void useIngredients() {
+        waterTank.setWaterTank(waterTank.getWaterTank() - 1);
+        garbageCan = garbageCan - 1;
+        milk = milk - 1;
+        coffeeBeans = coffeeBeans - 1;
+        logger.info("used ingredients for coffee making");
+    }
+
+    /**
+     * uses ingredients to make cocoa
+     * does not need checking, because that is done previously
+     */
+    public void useIngredientsForCocoa() {
+        waterTank.setWaterTank(waterTank.getWaterTank() - 1);
+        garbageCan = garbageCan - 1;
+        milk = milk - 1;
+        cocoa = cocoa - 1;
+        logger.info("used ingredients for cocoa making");
+    }
+
+    /**
+     *
+     * @return the reason why machine cannot make coffee at the moment
+     * the reason is used for throwing an exception later
+     */
+    public CannotMakeCoffeeException.Reason findTheProblemOfTheMachine() {
+        if (waterTank.getWaterTank() == 0 && garbageCan == 0
+                && milk == 0 && coffeeBeans == 0) {
+            return MACHINE_EMPTY;
+        }
+        if (waterTank.getWaterTank() == 0) {
+            return NO_WATER_LEFT;
+        }
+        if (garbageCan == 0) {
+            return GARBAGE_CAN_FULL;
+        }
+        if (milk == 0) {
+            return NO_MILK;
+        }  else {
+            return NO_COFFEE_BEANS;
+        }
+    }
+
+    /**
+     *
+     * @param coffeeType the coffee type that machine is going to make,
+     * can make only ordinary coffee and cocoa
+     * @return coffee type, if it was made
+     * @throws CannotMakeCoffeeException if machine could not make coffee
+     */
+    public Coffee makeCoffee(Coffee coffeeType) throws CannotMakeCoffeeException {
+        if (coffeeType.equals(COFFEE) || coffeeType.equals(COCOA)) {
+            if (canMakeCoffee() && coffeeType.equals(COFFEE)) {
+                useIngredients();
+                logger.info("coffee machine made a coffee");
+                return COFFEE;
+            }
+            if (canMakeCocoa()) {
+                useIngredientsForCocoa();
+                logger.info("coffee machine made a cocoa");
+                return COCOA;
+            }
+            logger.info("coffee machine couldn't make coffee or cocoa");
+            throw new CannotMakeCoffeeException(this, findTheProblemOfTheMachine());
+        }
+        if (coffeeType.equals(HOT_WATER)) {
+            if (waterTank.getWaterTank() - 1 >= 0) {
+                waterTank.setWaterTank(waterTank.getWaterTank() - 1);
+                return HOT_WATER;
+            } else {
+                throw new CannotMakeCoffeeException(this, NO_WATER_LEFT);
+            }
+        } else {
+            logger.info("coffee machine couldn't make coffee");
+            throw new CannotMakeCoffeeException(this, WRONG_TYPE_COFFEE);
+        }
+    }
+}
