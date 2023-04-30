@@ -1,0 +1,21 @@
+package ee.taltech.iti0202.kt.store;
+
+public class ExceptionCannotBuyProduct extends Exception {
+
+    private final Client client;
+    private final Reason reason;
+
+    /**
+     *
+     * @param client who does not have enough money
+     * @param reason why the client cannot buy something
+     */
+    public ExceptionCannotBuyProduct(Client client, Reason reason) {
+        this.client = client;
+        this.reason = reason;
+    }
+
+    public enum Reason {
+        NOT_ENOUGH_MONEY;
+    }
+}
