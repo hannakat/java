@@ -1,0 +1,6 @@
+package ee.taltech.iti0202.kt.store;
+
+public enum Campaign {
+    TWO_FOR_ONE,
+    THREE_FOR_ONE;
+}
