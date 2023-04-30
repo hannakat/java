@@ -6,7 +6,7 @@ import java.util.Set;
 public class Client {
     private final int id;
     private final ClientType type;
-    Set<String> shoppingHistory = new HashSet<>();
+    Stack<String> shoppingHistory = new Stack<>();
     private ShoppingList shoppingList;
     private int wallet;
     private Campaign campaign = null;
