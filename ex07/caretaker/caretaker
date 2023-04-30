@@ -1,0 +1,59 @@
+package ee.taltech.iti0202.zoo.caretaker;
+
+import ee.taltech.iti0202.zoo.Zoo;
+import ee.taltech.iti0202.zoo.animal.Animal;
+
+import java.util.List;
+
+public class Caretaker {
+    private String name;
+    private List<Animal.Type> canFeed;
+    private Zoo zoo;
+
+    /**
+     *
+     * @param name caretaker's name
+     * @param canFeed list of animals that can feed
+     */
+    public Caretaker(String name, List<Animal.Type> canFeed) {
+        this.name = name;
+        this.canFeed = canFeed;
+
+    }
+
+    public List<Animal.Type> getCanFeed() {
+        return canFeed;
+    }
+
+    public void setZoo(Zoo zoo) {
+        this.zoo = zoo;
+    }
+
+    /**
+     *
+     * @param toFeed list of animals to feed
+     * @return boolean if the animals got their food
+     */
+    public boolean feedAnimal(List<Animal> toFeed) {
+        int count = 0;
+        for (Animal animal : toFeed) {
+            if (canFeed.contains(animal.getType())) {
+                if (animal.isHungry()) {
+                    animal.feedAnimal();
+                    count++;
+                    zoo.getUnfedAnimals().remove(animal);
+                } else if (!animal.isHungry()) {
+                    count++;
+                }
+            } else if (zoo.letColleagueDoTheJob(animal) && animal.isHungry()) {
+                zoo.letColleagueDoTheJob(animal);
+                count++;
+            } else {
+                if (!zoo.unfedAnimals.contains(animal)) {
+                    zoo.unfedAnimals.add(animal);
+                }
+            }
+        }
+        return count == toFeed.size();
+    }
+}
