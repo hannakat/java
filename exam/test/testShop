@@ -1,0 +1,144 @@
+import ee.taltech.iti0202.kt.store.Campaign;
+import ee.taltech.iti0202.kt.store.Client;
+import ee.taltech.iti0202.kt.store.ClientType;
+import ee.taltech.iti0202.kt.store.ExceptionCannotBuyProduct;
+import ee.taltech.iti0202.kt.store.Product;
+import ee.taltech.iti0202.kt.store.ProductType;
+import ee.taltech.iti0202.kt.store.Shop;
+import ee.taltech.iti0202.kt.store.ShoppingList;
+import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
+
+public class TestShop {
+
+    @Test
+    public void testShopGetRegisterClients() {
+        Shop shop = new Shop();
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        Client client2 = new Client(10, ClientType.REGULAR, shoppingList);
+        shop.registeredClient(client);
+        shop.registeredClient(client);
+        shop.registeredClient(client2);
+
+        assertEquals(List.of(client, client2), shop.getRegisteredClients());
+    }
+
+    @Test
+    public void testShopIsClosed() throws ExceptionCannotBuyProduct {
+        Shop shop = new Shop();
+        ShoppingList shoppingList = new ShoppingList();
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        Product butter = new Product("butter", ProductType.HAS_BARCODE, 20);
+        Product water = new Product("water", ProductType.HAS_BARCODE, 2);
+
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+        shop.registeredClient(client);
+
+        client.addProductToShoppingList(milk, 3);
+        client.addProductToShoppingList(butter, 3);
+        client.addProductToShoppingList(water, 3);
+
+        shop.addProductToShop(milk, 3);
+        shop.addProductToShop(butter, 3);
+        shop.addProductToShop(water, 3);
+
+        assertTrue(shop.isOpen());
+
+        shop.clientBuyShoppingList(client);
+
+        assertFalse(shop.isOpen());
+    }
+
+    @Test
+    public void testClientCanBuyFromShop() throws ExceptionCannotBuyProduct {
+        Shop shop = new Shop();
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        shop.addProductToShop(milk, 10);
+        shop.registeredClient(client);
+
+        client.addProductToShoppingList(milk, 1);
+        shop.clientBuyShoppingList(client);
+
+        assertEquals(Optional.of(9), Optional.of(shop.getAmountOfProduct(milk)));
+        assertEquals(990, client.getWallet());
+        String historyResult = "milk was bought, 1";
+        assertEquals(Set.of(historyResult), client.getShoppingHistory());
+    }
+
+    @Test
+    public void testGoldStatusClientBuysFromShop() throws ExceptionCannotBuyProduct {
+        Shop shop = new Shop();
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.GOLD_CLIENT, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        shop.addProductToShop(milk, 10);
+        shop.registeredClient(client);
+
+        client.addProductToShoppingList(milk, 1);
+        shop.clientBuyShoppingList(client);
+
+        assertEquals(Optional.of(9), Optional.of(shop.getAmountOfProduct(milk)));
+        assertEquals(991, client.getWallet());
+    }
+
+    @Test
+    public void testSetCampaignBuyFromShop() throws ExceptionCannotBuyProduct {
+        Shop shop = new Shop();
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        Product butter = new Product("butter", ProductType.HAS_BARCODE, 20);
+        Product water = new Product("water", ProductType.HAS_BARCODE, 2);
+
+        shop.addProductToShop(milk, 10);
+        shop.addProductToShop(butter, 15);
+        shop.addProductToShop(water, 13);
+
+        shop.registeredClient(client);
+        client.addProductToShoppingList(milk, 1);
+        client.addProductToShoppingList(butter, 1);
+        client.addProductToShoppingList(water, 1);
+
+        client.setCampaign(Campaign.TWO_FOR_ONE);
+
+        shop.clientBuyShoppingList(client);
+
+        // ÜHE toote eest ei pidanud maksma ehk maksimum arve oleks olnud 32, aga praegu on vähem
+        assertEquals(988, client.getWallet());
+    }
+
+    @Test
+    public void testShopHasNotEnoughProductsToBuy() throws ExceptionCannotBuyProduct {
+        Shop shop = new Shop();
+        ShoppingList shoppingList = new ShoppingList();
+        Client client = new Client(10, ClientType.REGULAR, shoppingList);
+        client.setWallet(1000);
+
+        Product milk = new Product("milk", ProductType.HAS_BARCODE, 10);
+        shop.addProductToShop(milk, 10);
+        shop.registeredClient(client);
+
+        client.addProductToShoppingList(milk, 12);
+        shop.clientBuyShoppingList(client);
+
+        assertEquals(Optional.of(10), Optional.of(shop.getAmountOfProduct(milk)));
+        assertEquals(1000, client.getWallet());
+    }
+}
