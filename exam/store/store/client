@@ -1,0 +1,99 @@
+package ee.taltech.iti0202.kt.store;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class Client {
+    private final int id;
+    private final ClientType type;
+    Set<String> shoppingHistory = new HashSet<>();
+    private ShoppingList shoppingList;
+    private int wallet;
+    private Campaign campaign = null;
+    public static final double DISCOUNT_AMOUNT_FOR_GOLD_CLIENT = 0.9;
+
+    /**
+     *
+     * @param id the id of the client
+     * @param type the type of the client
+     * @param shoppingList the shopping list of the client
+     */
+    public Client(int id, ClientType type, ShoppingList shoppingList) {
+        this.id = id;
+        this.type = type;
+        this.wallet = 0;
+        this.shoppingList = shoppingList;
+    }
+
+    public void setWallet(int wallet) {
+        this.wallet = wallet;
+    }
+
+    public int getWallet() {
+        return wallet;
+    }
+
+    /**
+     *
+     * @param history adds information about what was bought to set
+     */
+    public void addHistory(String history) {
+        shoppingHistory.add(history);
+    }
+
+    public Set<String> getShoppingHistory() {
+        return shoppingHistory;
+    }
+
+    public void setCampaign(Campaign campaign) {
+        this.campaign = campaign;
+    }
+
+    public ShoppingList getShoppingList() {
+        return shoppingList;
+    }
+
+    public Campaign getCampaign() {
+        return campaign;
+    }
+
+    /**
+     *
+     * @param product to add to shopping list
+     * @param amount how much of that product is wished to buy
+     * @throws ExceptionCannotBuyProduct if client does not have enough money
+     */
+    public void addProductToShoppingList(Product product, Integer amount) throws ExceptionCannotBuyProduct {
+        if (wallet >= product.getPrice() * amount * getDiscount()) {
+            if (shoppingList.containsProduct(product)) {
+                Integer currentAmount = shoppingList.getAmount(product);
+                shoppingList.replace(product, amount + currentAmount);
+            } else {
+                shoppingList.addNewProductToShoppingList(product, amount);
+            }
+        } else {
+            throw new ExceptionCannotBuyProduct(this, ExceptionCannotBuyProduct.Reason.NOT_ENOUGH_MONEY);
+        }
+    }
+
+    /**
+     *
+     * @param product that is being removed from shopping list
+     */
+    public void removeProductFromShoppingList(Product product) {
+        if (shoppingList.containsProduct(product)) {
+            shoppingList.removeProductFromShoppingList(product);
+        }
+    }
+
+    /**
+     *
+     * @return 0.9 if client has gold client status
+     */
+    public double getDiscount() {
+        if (this.type == ClientType.REGULAR) {
+            return 1;
+        }
+        return DISCOUNT_AMOUNT_FOR_GOLD_CLIENT;
+    }
+}
