@@ -1,0 +1,207 @@
+package ee.taltech.iti0202.coffee;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+import ee.taltech.iti0202.coffee.kitchen.Kitchen;
+import ee.taltech.iti0202.coffee.machine.Automatic;
+import ee.taltech.iti0202.coffee.machine.AutomaticMachineBuilder;
+import ee.taltech.iti0202.coffee.machine.Capsule;
+import ee.taltech.iti0202.coffee.machine.CapsuleMachineBuilder;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachine;
+import ee.taltech.iti0202.coffee.machine.CoffeeMachineBuilder;
+import ee.taltech.iti0202.coffee.machine.WaterTank;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertThrows;
+import static org.testng.AssertJUnit.assertEquals;
+
+public class KitchenTest {
+    public static final int KITCHEN_LIST = 6;
+
+    @Test
+    public void testKitchenAddRemoveMachinesList() {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        Automatic automaticA = new AutomaticMachineBuilder().withWater(water).build();
+        Automatic automaticB = new AutomaticMachineBuilder().withWater(water).build();
+
+        Capsule capsuleA = new CapsuleMachineBuilder().withWater(water).build();
+        Capsule capsuleB = new CapsuleMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+        kitchen.addCoffeeMachine(machineB);
+        kitchen.addCoffeeMachine(automaticA);
+        kitchen.addCoffeeMachine(automaticB);
+        kitchen.addCoffeeMachine(capsuleA);
+        kitchen.addCoffeeMachine(capsuleB);
+
+        assertEquals(KITCHEN_LIST, kitchen.getCoffeeMachines().size());
+
+        kitchen.removeCoffeeMachine(machineA);
+        kitchen.removeCoffeeMachine(automaticA);
+        kitchen.removeCoffeeMachine(capsuleA);
+
+        assertEquals(3, kitchen.getCoffeeMachines().size());
+    }
+
+    @Test
+    public void testKitchenMakeCoffee() throws CannotMakeCoffeeException {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        Automatic automaticA = new AutomaticMachineBuilder().withWater(water).build();
+        Automatic automaticB = new AutomaticMachineBuilder().withWater(water).build();
+
+        Capsule capsuleA = new CapsuleMachineBuilder().withWater(water).build();
+        Capsule capsuleB = new CapsuleMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+        kitchen.addCoffeeMachine(machineB);
+        kitchen.addCoffeeMachine(automaticA);
+        kitchen.addCoffeeMachine(automaticB);
+        kitchen.addCoffeeMachine(capsuleA);
+        kitchen.addCoffeeMachine(capsuleB);
+
+        assertEquals("coffee x 6", kitchen.kitchenAllMachinesMakeOneCoffee(CoffeeMachine.Coffee.COFFEE));
+    }
+
+    @Test
+    public void testKitchenMakeCoffeeMakeCoffeeKitchenEmpty() throws CannotMakeCoffeeException {
+        Kitchen kitchen = new Kitchen();
+        assertEquals("coffee x 0", kitchen.kitchenAllMachinesMakeOneCoffee(CoffeeMachine.Coffee.COFFEE));
+    }
+
+    @Test
+    public void testKitchenMakeCoffeeMakeCoffeeThatCoffeeMachineCannotDo() throws CannotMakeCoffeeException {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        Automatic automaticA = new AutomaticMachineBuilder().withWater(water).build();
+        Automatic automaticB = new AutomaticMachineBuilder().withWater(water).build();
+
+        Capsule capsuleA = new CapsuleMachineBuilder().withWater(water).build();
+        Capsule capsuleB = new CapsuleMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+        kitchen.addCoffeeMachine(machineB);
+        kitchen.addCoffeeMachine(automaticA);
+        kitchen.addCoffeeMachine(automaticB);
+        kitchen.addCoffeeMachine(capsuleA);
+        kitchen.addCoffeeMachine(capsuleB);
+
+        assertEquals("latte x 4", kitchen.kitchenAllMachinesMakeOneCoffee(CoffeeMachine.Coffee.LATTE));
+    }
+
+    @Test
+    public void testKitchenMakeCocoa() throws CannotMakeCoffeeException {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        Automatic automaticA = new AutomaticMachineBuilder().withWater(water).build();
+        Automatic automaticB = new AutomaticMachineBuilder().withWater(water).build();
+
+        Capsule capsuleA = new CapsuleMachineBuilder().withWater(water).build();
+        Capsule capsuleB = new CapsuleMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+        kitchen.addCoffeeMachine(machineB);
+        kitchen.addCoffeeMachine(automaticA);
+        kitchen.addCoffeeMachine(automaticB);
+        kitchen.addCoffeeMachine(capsuleA);
+        kitchen.addCoffeeMachine(capsuleB);
+
+        assertEquals("cocoa x 6", kitchen.kitchenAllMachinesMakeOneCoffee(CoffeeMachine.Coffee.COCOA));
+    }
+
+    @Test
+    public void testKitchenMakeSpecificCoffee() throws CannotMakeCoffeeException {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+
+        assertEquals(CoffeeMachine.Coffee.COFFEE, kitchen.kitchenMakeSpecificCoffee(
+                machineA, CoffeeMachine.Coffee.COFFEE));
+    }
+
+    @Test
+    public void testKitchenMakeCoffeeMachineCannotDo() {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            kitchen.kitchenMakeSpecificCoffee(machineA, CoffeeMachine.Coffee.LATTE);
+        });
+    }
+
+    @Test
+    public void testKitchenMakeSpecificCoffeeMachineNotInKitchen() {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            kitchen.kitchenMakeSpecificCoffee(machineB, CoffeeMachine.Coffee.COFFEE);
+        });
+    }
+
+    @Test
+    public void testKitchenMakeCoffeeOutOfIngredients() {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+        kitchen.addCoffeeMachine(machineB);
+
+        water.changeWaterTankSize(0);
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            kitchen.kitchenMakeSpecificCoffee(machineB, CoffeeMachine.Coffee.COFFEE);
+        });
+    }
+
+    @Test
+    public void testKitchenMakeCoffeeRunsOutOfIngredients() throws CannotMakeCoffeeException {
+        Kitchen kitchen = new Kitchen();
+        WaterTank water = new WaterTank();
+
+        CoffeeMachine machineA = new CoffeeMachineBuilder().withWater(water).build();
+        CoffeeMachine machineB = new CoffeeMachineBuilder().withWater(water).build();
+
+        kitchen.addCoffeeMachine(machineA);
+        kitchen.addCoffeeMachine(machineB);
+
+        for (int i = 0; i < 5; i++) {
+            kitchen.kitchenMakeSpecificCoffee(machineB, CoffeeMachine.Coffee.COFFEE);
+        }
+
+        assertThrows(CannotMakeCoffeeException.class, () -> {
+            kitchen.kitchenMakeSpecificCoffee(machineB, CoffeeMachine.Coffee.COFFEE);
+        });
+    }
+}
