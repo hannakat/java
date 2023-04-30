@@ -1,0 +1,107 @@
+package ee.taltech.iti0202.coffee.machine;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.GARBAGE_CAN_FULL;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_WATER_LEFT;
+import static ee.taltech.iti0202.coffee.machine.CoffeeMachine.Coffee.HOT_WATER;
+
+public class Capsule extends CoffeeMachine {
+
+    private WaterTank waterTank;
+    private Optional<Coffee> capsuleContainer = Optional.empty();
+    private static Logger logger = Logger.getLogger(Capsule.class.getName());
+
+    /**
+     *
+     * @param waterTank every machine has water tank
+     * Capsule machine does not use coffee beans - coffee is in the capsule
+     */
+    public Capsule(WaterTank waterTank) {
+        super(waterTank);
+        this.waterTank = waterTank;
+        setGarbageCan(10);
+    }
+
+    /**
+     *
+     * @param capsules wished coffee type that is used for coffee making
+     */
+    public void addCapsule(Coffee capsules) {
+        capsuleContainer = Optional.of(capsules);
+        logger.info("coffee type was added to the capsule");
+    }
+
+    /**
+     * removes coffee from capsule after coffee was made
+     */
+    public void emptyCapsule() {
+        capsuleContainer = Optional.empty();
+        logger.info("coffee type was removed from the capsule");
+    }
+
+    /**
+     * checks only for water and garbage can,
+     * because capsule does not need coffee beans or cocoa powder
+     * * @return true, if it has enough water and garbage can is not full
+     */
+    @Override
+    public boolean canMakeCoffee() {
+        if (waterTank.getWaterTank() - 1 < 0) {
+            return false;
+        }
+        return getGarbageCan() - 1 >= 0;
+    }
+
+    /**
+     * uses water and adds one cup of garbage to garbage can
+     */
+    @Override
+    public void useIngredients() {
+        waterTank.setWaterTank(waterTank.getWaterTank() - 1);
+        setGarbageCan(getGarbageCan() - 1);
+        logger.info("capsule machine used ingredients");
+    }
+
+    /**
+     *
+     * @return the reason why the capsule cannot make coffee at the moment
+     * possibilities are that machine does not have enough water or garbage can is full
+     */
+    @Override
+    public CannotMakeCoffeeException.Reason findTheProblemOfTheMachine() {
+        if (waterTank.getWaterTank() == 0) {
+            return NO_WATER_LEFT;
+        }
+        return GARBAGE_CAN_FULL;
+    }
+
+    /**
+     *
+     * @param coffee (uses capsuleContainer instead in this method) the wished coffee type
+     * @return type of coffee, if it was made, if capsule was empty makes hot water
+     * @throws CannotMakeCoffeeException if machine does not have enough water or garbage can is full
+     */
+    @Override
+    public Coffee makeCoffee(Coffee coffee) throws CannotMakeCoffeeException {
+        if (capsuleContainer.isPresent()) {
+            if (canMakeCoffee()) {
+                useIngredients();
+                emptyCapsule();
+                logger.info("capsule machine made a " + coffee.toString().toLowerCase());
+                return coffee;
+            }
+        }
+        if (capsuleContainer.isEmpty()) {
+            waterTank.setWaterTank(waterTank.getWaterTank() - 1);
+            logger.info("capsule machine made hot water");
+            return HOT_WATER;
+        }
+        logger.info("capsule machine couldn't make a drink, because "
+                + findTheProblemOfTheMachine().toString().toLowerCase());
+        throw new CannotMakeCoffeeException(this, findTheProblemOfTheMachine());
+    }
+}
