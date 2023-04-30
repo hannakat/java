@@ -1,0 +1,61 @@
+package ee.taltech.iti0202.coffee.machine;
+
+import ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException;
+
+import java.util.logging.Logger;
+
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.GARBAGE_CAN_FULL;
+import static ee.taltech.iti0202.coffee.exception.CannotMakeCoffeeException.Reason.NO_WATER_LEFT;
+
+public class Automatic extends CoffeeMachine {
+    private WaterTank waterTank;
+    private static Logger logger = Logger.getLogger(Automatic.class.getName());
+
+    /**
+     * @param waterTank every automatic coffee machine has water tank
+     */
+    public Automatic(WaterTank waterTank) {
+        super(waterTank);
+        this.waterTank = waterTank;
+    }
+
+    /**
+     * @return true if machine has enough water to make one cup of coffee
+     * automatic coffee machine does not need check for anything else
+     */
+    @Override
+    public boolean canMakeCoffee() {
+        if (getGarbageCan() - 1 < 0) {
+            return false;
+        }
+        return waterTank.getWaterTank() - 1 >= 0;
+    }
+
+    @Override
+    public CannotMakeCoffeeException.Reason findTheProblemOfTheMachine() {
+        if (waterTank.getWaterTank() <= 0) {
+            return NO_WATER_LEFT;
+        } else {
+            return GARBAGE_CAN_FULL;
+        }
+    }
+
+    /**
+     * @return type of coffee that was made
+     * automatic machine can make different types of coffees
+     * can make coffee when machine has enough water and garbage can is not full
+     */
+    @Override
+    public Coffee makeCoffee(Coffee coffeeType) throws CannotMakeCoffeeException {
+        if (canMakeCoffee()) {
+            waterTank.setWaterTank(waterTank.getWaterTank() - 1);
+            setGarbageCan(getGarbageCan() - 1);
+            logger.info("automatic machine used ingredients");
+            logger.info("automatic machine made a " + coffeeType.toString().toLowerCase());
+            return coffeeType;
+        }
+        logger.info("automatic machine couldn't make coffee, because "
+                + findTheProblemOfTheMachine().toString().toLowerCase());
+        throw new CannotMakeCoffeeException(this, findTheProblemOfTheMachine());
+    }
+}
