@@ -1,0 +1,137 @@
+package ee.taltech.iti0202.kt.store;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+public class Shop {
+    private boolean open;
+    private HashMap<Product, Integer> products = new HashMap<>();
+    private List<Client> registeredClients = new ArrayList<>();
+    private List<String> history = new ArrayList<>();
+
+    public static final int GOLD_CLIENT_DISCOUNT = 90;
+
+    /**
+     * the shop is opened at first
+     */
+    public Shop() {
+        this.open = true;
+    }
+
+    /**
+     *
+     * @param product that is added to shop
+     * @param amount how much of that product is being added
+     */
+    public void addProductToShop(Product product, Integer amount) {
+        products.put(product, amount);
+    }
+
+    /**
+     *
+     * @param client that is being registered to shop
+     */
+    public void registeredClient(Client client) {
+        if (!registeredClients.contains(client)) {
+            registeredClients.add(client);
+        }
+    }
+
+    /**
+     *
+     * @param product that is being sold
+     * @param amount how much of that product
+     * @return true, if that product exists and was bought
+     */
+    public boolean sellProduct(Product product, Integer amount) {
+        if (products.containsKey(product)) {
+            int currentAmount = products.get(product);
+            int newAmount = currentAmount - amount;
+            if (newAmount == 0) {
+                products.remove(product);
+            }
+            products.replace(product, newAmount);
+            String result = product + "was bought, " + amount;
+            history.add(result);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @param product which amount you want to know
+     * @return the amount of the product that's in the shop
+     */
+    public Integer getAmountOfProduct(Product product) {
+        if (products.containsKey(product)) {
+            return products.get(product);
+        }
+        return 0;
+    }
+
+    /**
+     *
+     * @param product what product is being sold
+     * @param amount how much of that product is being sold
+     * @return true, if shop has enough product
+     */
+    public boolean hasEnoughProductToBuy(Product product, Integer amount) {
+        if (products.containsKey(product)) {
+            return products.get(product) >= amount;
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return true, if shop was just opened. false, if all the products were sold out
+     */
+    public boolean isOpen() {
+        if (products.size() > 0) {
+            this.open = false;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return list of shops clients
+     */
+    public List<Client> getRegisteredClients() {
+        return registeredClients;
+    }
+
+    /**
+     *
+     * @param client who is going to buy all the products in its shopping list
+     */
+    public void clientBuyShoppingList(Client client) {
+        int discount = 1;
+        if (client.getCampaign() == Campaign.TWO_FOR_ONE) {
+            discount = 2;
+        }
+        if (client.getCampaign() == Campaign.THREE_FOR_ONE) {
+            discount = 3;
+        }
+        int discountCount = 1;
+        for (Product product : client.getShoppingList().getShoppingList().keySet()) {
+            if (hasEnoughProductToBuy(product, client.getShoppingList().getAmount(product))) {
+                if (product.getProductType() == ProductType.HAS_BARCODE && discountCount / discount == 0) {
+                    discountCount++;
+                    continue;
+                }
+                if (client.getDiscount() == 1) {
+                    client.setWallet(client.getWallet() - product.getPrice());
+                } else {
+                    client.setWallet(client.getWallet() - (product.getPrice() * GOLD_CLIENT_DISCOUNT / 100));
+                }
+                sellProduct(product, client.getShoppingList().getShoppingList().get(product));
+                String result = product.getName() + " was bought, " + client.getShoppingList().getAmount(product);
+                client.addHistory(result);
+            }
+        }
+    }
+}
